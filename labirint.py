@@ -1,21 +1,21 @@
 from pygame import *
 
 
-#класс-родитель для других спрайтов
+
 class GameSprite(sprite.Sprite):
- # конструктор класса
+
  def __init__(self, player_image, player_x, player_y, size_x, size_y):
-     # Вызываем конструктор класса (Sprite):
+     
      sprite.Sprite.__init__(self)
-     # каждый спрайт должен хранить свойство image - изображение
+     
      self.image = transform.scale(image.load(player_image), (size_x, size_y))
 
 
-     # каждый спрайт должен хранить свойство rect - прямоугольник, в который он вписан
+     
      self.rect = self.image.get_rect()
      self.rect.x = player_x
      self.rect.y = player_y
- # метод, отрисовывающий героя на окне
+
  def reset(self):
      window.blit(self.image, (self.rect.x, self.rect.y))
 
@@ -23,9 +23,9 @@ class GameSprite(sprite.Sprite):
 
 
 class Player(GameSprite):
- #метод, в котором реализовано управление спрайтом по кнопкам стрелкам клавиатуры
+
  def __init__(self, player_image, player_x, player_y, size_x, size_y, player_x_speed,player_y_speed):
-     # Вызываем конструктор класса (Sprite):
+     
      GameSprite.__init__(self, player_image, player_x, player_y,size_x, size_y)
 
 
@@ -33,28 +33,28 @@ class Player(GameSprite):
      self.y_speed = player_y_speed
  def update(self):
       ''' перемещает персонажа, применяя текущую горизонтальную и вертикальную скорость'''
-      # сначала движение по горизонтали
+      
       if packman.rect.x <= win_width-80 and packman.x_speed > 0 or packman.rect.x >= 0 and packman.x_speed < 0:
         self.rect.x += self.x_speed
-      # если зашли за стенку, то встанем вплотную к стене
+     
       platforms_touched = sprite.spritecollide(self, barriers, False)
-      if self.x_speed > 0: # идём направо, правый край персонажа - вплотную к левому краю стены
+      if self.x_speed > 0: 
           for p in platforms_touched:
-              self.rect.right = min(self.rect.right, p.rect.left) # если коснулись сразу нескольких, то правый край - минимальный из возможных
-      elif self.x_speed < 0: # идем налево, ставим левый край персонажа вплотную к правому краю стены
+              self.rect.right = min(self.rect.right, p.rect.left)
+      elif self.x_speed < 0: 
           for p in platforms_touched:
-              self.rect.left = max(self.rect.left, p.rect.right) # если коснулись нескольких стен, то левый край - максимальный
+              self.rect.left = max(self.rect.left, p.rect.right)
       if packman.rect.y <= win_height-80 and packman.y_speed > 0 or packman.rect.y >= 0 and packman.y_speed < 0:
        self.rect.y += self.y_speed
-      # если зашли за стенку, то встанем вплотную к стене
+      
       platforms_touched = sprite.spritecollide(self, barriers, False)
-      if self.y_speed > 0: # идем вниз
+      if self.y_speed > 0: 
           for p in platforms_touched:
-              # Проверяем, какая из платформ снизу самая высокая, выравниваемся по ней, запоминаем её как свою опору:
+              
               self.rect.bottom = min(self.rect.bottom, p.rect.top)
-      elif self.y_speed < 0: # идём вверх
+      elif self.y_speed < 0: 
           for p in platforms_touched:
-              self.rect.top = max(self.rect.top, p.rect.bottom) # выравниваем верхний край по нижним краям стенок, на которые наехали
+              self.rect.top = max(self.rect.top, p.rect.bottom) 
               
 class Enemy(GameSprite):
     def __init__ (self,player_image, player_x, player_y, size_x, size_y,speed):
@@ -80,41 +80,40 @@ class Bullet(GameSprite):
             self.kill()
 
 
-#Создаём окошко
+
 win_width = 700
 win_height = 500
 display.set_caption("Лабиринт")
 window = display.set_mode((win_width, win_height))
-back = (119, 210, 223)#задаём цвет согласно цветовой схеме RGB
+back = (119, 210, 223)
 
 
-#создаём группу для стен
+
 barriers = sprite.Group()
 
 
 
-#создаём стены картинки
+
 w1 = GameSprite('platform_h.png',win_width / 2 - win_width / 3, win_height / 2, 300, 50)
 w2 = GameSprite('platform_v.png', 370, 100, 50, 400)
 
 
-#добавляем стены в группу
+
 barriers.add(w1)
 barriers.add(w2)
 
 
-#создаём спрайты
+
 packman = Player('385190.jpg', 5, win_height - 80, 80, 80, 0, 0)
 monster = Enemy('angry-birds.png', win_width - 80, 180, 80, 80, 5)
 final_sprite = GameSprite('a97f27da5bfe3d16b95afa020ed2641d.jpg', win_width - 85, win_height - 100, 80, 80)
 
 
-#переменная, отвечающая за то, как кончилась игра
+
 finish = False
-#игровой цикл
+
 run = True
 while run:
- #цикл срабатывает каждую 0.05 секунд
  time.delay(50)
 
 
@@ -140,22 +139,19 @@ while run:
           elif e.key == K_DOWN:
               packman.y_speed = 0
  if not finish:
-   window.fill(back)#закрашиваем окно цветом
-   #рисуем объекты
-   # w1.reset()
-   # w2.reset()
+   window.fill(back)
    barriers.draw(window)
   
    monster.reset()
    final_sprite.reset()
    packman.reset()
-   #включаем движение
+  
    packman.update()
    monster.update()
-   #Проверка столкновения героя с врагом и стенами
+   
    if sprite.collide_rect(packman, monster):
        finish = True
-       #вычисляем отношение
+       
        img = image.load('maxresdefault (2).jpg')
        d = img.get_width() // img.get_height()
        window.fill((255, 255, 255))
